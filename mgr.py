@@ -42,9 +42,16 @@ CONFIG = {
   's3': CONF_PATH + '/s3.conf',
 }
 
+def print_cmd(cmd, tag=None):
+    if not tag:
+        print cmd
+        return
+
+    print '[{}] {}'.format(tag, cmd)
+
 def run(mb, log, conf):
     cmd = '{} --logpath {} --config {}'.format(mb, log, conf) 
-    print cmd
+    print_cmd(cmd, tag='Run')
     print os.system(cmd)
 
 def master():
@@ -58,26 +65,45 @@ def w2():
     run(mb=mongod, log=MONGO_LOG + '/s2.log', conf=CONFIG['s2'])
 
 def w3():
-    run(mb=mongod, log=MONGO_LOG + '/s2.log', conf=CONFIG['s2'])
+    run(mb=mongod, log=MONGO_LOG + '/s3.log', conf=CONFIG['s3'])
 
-def start():
-    pass
+def mongo_shell(shell=None):
+    if not shell:
+        return
 
-def shutdown():
-    pass
+    cmd = '{} {}'.format(mongo, shell)
+    print_cmd(cmd, tag='Run')
+    print os.system(cmd)
+
+def killall():
+    processes = ['mongod', 'mongos']    
+    for p in processes:
+        cmd = 'pkill {}'.format(p)
+        print_cmd(cmd, tag='Run')
+        print os.system(cmd)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('host', help='Running machine hostname')
+    parser = argparse.ArgumentParser(description='MongoDB Running Tools')
+    parser.add_argument('-s', '--shell', help='Running MongoDB shell')
+    parser.add_argument('-m', '--machine', help='Running machine')
+    parser.add_argument('-ka', '--killall', help='Killall running processes', action='store_true')
     args = parser.parse_args()
 
-    if args.host == 'master':
-        master()
-    elif args.host == 'w1':
-        w1()
-    elif args.host == 'w2':
-        w2()
-    elif args.host == 'w3':
-        w3()
-    else:
-        print 'Dry run'
+    if args.shell:
+        mongo_shell(args.shell)
+
+    if args.killall:
+        killall()
+
+    if args.machine:
+        machine = args.machine
+        if machine == 'master':
+            master()
+        elif machine == 'w1':
+            w1()
+        elif machine == 'w2':
+            w2()
+        elif machine == 'w3':
+            w3()
+        else:
+            print 'Dry run'
