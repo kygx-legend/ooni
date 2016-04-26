@@ -20,10 +20,10 @@ ip = {
 }
 
 # Path
-PATH = '/data/opt'
+PATH = '/data'
 CONF_PATH = os.getcwd() + '/conf'
-MONGO_BIN_PATH = PATH + '/bin'
-MONGO_PATH = PATH + '/mongo'
+MONGO_BIN_PATH = PATH + '/opt/mongo-tools/bin'
+MONGO_PATH = PATH + '/legend'
 MONGO_DATA = MONGO_PATH + '/db'
 MONGO_LOG = MONGO_PATH + '/log'
 
@@ -44,6 +44,7 @@ CONFIG = {
 
 def run(mb, log, conf):
     cmd = '{} --logpath {} --config {}'.format(mb, log, conf) 
+    print cmd
     print os.system(cmd)
 
 def master():
