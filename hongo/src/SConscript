@@ -1,0 +1,12 @@
+Import('env')
+
+CXXFLAGS = ['-std=c++11']
+PKG_CONFIG_MONGO = 'pkg-config --cflags --libs libmongocxx'
+
+targets = ['Generate', 'Check']
+
+env = env.Clone()
+env.Append(CXXFLAGS=CXXFLAGS)
+env.ParseConfig(PKG_CONFIG_MONGO)
+env.Program(targets[0], ['generate.cpp'])
+env.Program(targets[1], ['check.cpp'])
