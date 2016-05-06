@@ -16,7 +16,10 @@ ip = {
   'master': '172.16.104.62',
   'w1': '172.16.104.1',
   'w2': '172.16.104.2',
-  'w3': '172.16.104.3'
+  'w3': '172.16.104.3',
+  'w18': '172.16.104.18',
+  'w19': '172.16.104.19',
+  'w20': '172.16.104.20'
 }
 
 # Path
@@ -40,6 +43,9 @@ CONFIG = {
   's1': CONF_PATH + '/s1.conf',
   's2': CONF_PATH + '/s2.conf',
   's3': CONF_PATH + '/s3.conf',
+  's18': CONF_PATH + '/s18.conf',
+  's19': CONF_PATH + '/s19.conf',
+  's20': CONF_PATH + '/s20.conf',
 }
 
 def print_cmd(cmd, tag=None):
@@ -66,6 +72,15 @@ def w2():
 
 def w3():
     run(mb=mongod, log=MONGO_LOG + '/s3.log', conf=CONFIG['s3'])
+
+def w18():
+    run(mb=mongod, log=MONGO_LOG + '/s18.log', conf=CONFIG['s18'])
+
+def w19():
+    run(mb=mongod, log=MONGO_LOG + '/s19.log', conf=CONFIG['s19'])
+
+def w20():
+    run(mb=mongod, log=MONGO_LOG + '/s20.log', conf=CONFIG['s20'])
 
 def mongo_shell(shell=None):
     if not shell:
@@ -105,5 +120,11 @@ if __name__ == "__main__":
             w2()
         elif machine == 'w3':
             w3()
+        elif machine == 'w18':
+            w18()
+        elif machine == 'w19':
+            w19()
+        elif machine == 'w20':
+            w20()
         else:
             print 'Dry run'
