@@ -63,6 +63,7 @@ target/
 
 # Temp files
 *.swp
+*.tmp
 
 # Hongo inlcudes built
 hongo/.*
