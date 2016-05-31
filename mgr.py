@@ -107,7 +107,5 @@ if __name__ == "__main__":
         assert hostname
         if hostname == 'master':
             master()
-        elif:
-            worker(hostname)
         else:
-            print 'Dry run'
+            worker(hostname)
