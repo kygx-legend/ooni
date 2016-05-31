@@ -1,9 +1,17 @@
 Import('env')
 
 CXXFLAGS = ['-std=c++11']
-PKG_CONFIG_MONGO = 'pkg-config --cflags --libs libmongocxx'
+PKG_CONFIG_MONGO = 'pkg-config --cflags --libs libmongocxx '
 
-targets = ['Generate', 'Check']
+targets = ['Generate', 'Check', 'Check2']
+
+test = env.Clone()
+test.Append(CXXFLAGS=CXXFLAGS)
+test.Append(CCFLAGS=['-w'])
+test.Append(CPPPATH=['/data/opt/include'])
+test.Append(LIBS=['mongoclient', 'boost_system', 'boost_thread-mt', 'boost_regex', 'rt'])
+test.Append(LIBPATH=['/data/opt/lib'])
+test.Program(targets[2], ['check2.cpp'])
 
 env = env.Clone()
 env.Append(CXXFLAGS=CXXFLAGS)

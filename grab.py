@@ -55,7 +55,7 @@ def getNews():
       doc = {
           "title": title,
           "link": '{}/{}'.format(head, link),
-          "content": content,
+          "content": content.replace("\"", "\'")
       }
       collection.insert_one(doc)
 
