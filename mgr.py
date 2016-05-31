@@ -17,6 +17,20 @@ ip = {
   'w1': '172.16.104.1',
   'w2': '172.16.104.2',
   'w3': '172.16.104.3',
+  'w4': '172.16.104.4',
+  'w5': '172.16.104.5',
+  'w6': '172.16.104.6',
+  'w7': '172.16.104.7',
+  'w8': '172.16.104.8',
+  'w9': '172.16.104.9',
+  'w10': '172.16.104.10',
+  'w11': '172.16.104.11',
+  'w12': '172.16.104.12',
+  'w13': '172.16.104.13',
+  'w14': '172.16.104.14',
+  'w15': '172.16.104.15',
+  'w16': '172.16.104.16',
+  'w17': '172.16.104.17',
   'w18': '172.16.104.18',
   'w19': '172.16.104.19',
   'w20': '172.16.104.20'
@@ -40,12 +54,6 @@ mongos = MONGO_BIN_PATH + '/mongos'
 CONFIG = {
   'config': CONF_PATH + '/config.conf',
   'route': CONF_PATH + '/route.conf',
-  's1': CONF_PATH + '/s1.conf',
-  's2': CONF_PATH + '/s2.conf',
-  's3': CONF_PATH + '/s3.conf',
-  's18': CONF_PATH + '/s18.conf',
-  's19': CONF_PATH + '/s19.conf',
-  's20': CONF_PATH + '/s20.conf',
 }
 
 def print_cmd(cmd, tag=None):
@@ -64,23 +72,8 @@ def master():
     run(mb=mongod, log=MONGO_LOG + '/config.log', conf=CONFIG['config'])
     run(mb=mongos, log=MONGO_LOG + '/route.log', conf=CONFIG['route'])
 
-def w1():
-    run(mb=mongod, log=MONGO_LOG + '/s1.log', conf=CONFIG['s1'])
-
-def w2():
-    run(mb=mongod, log=MONGO_LOG + '/s2.log', conf=CONFIG['s2'])
-
-def w3():
-    run(mb=mongod, log=MONGO_LOG + '/s3.log', conf=CONFIG['s3'])
-
-def w18():
-    run(mb=mongod, log=MONGO_LOG + '/s18.log', conf=CONFIG['s18'])
-
-def w19():
-    run(mb=mongod, log=MONGO_LOG + '/s19.log', conf=CONFIG['s19'])
-
-def w20():
-    run(mb=mongod, log=MONGO_LOG + '/s20.log', conf=CONFIG['s20'])
+def worker(w):
+    run(mb=mongod, log=MONGO_LOG + '/{}.log'.format(w), conf=CONF_PATH + '/{}.conf'.format(w))
 
 def mongo_shell(shell=None):
     if not shell:
@@ -100,7 +93,7 @@ def killall():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='MongoDB Running Tools')
     parser.add_argument('-s', '--shell', help='Running MongoDB shell')
-    parser.add_argument('-m', '--machine', help='Running machine')
+    parser.add_argument('-r', '--run', help='Running machine', action='store_true')
     parser.add_argument('-ka', '--killall', help='Killall running processes', action='store_true')
     args = parser.parse_args()
 
@@ -110,21 +103,11 @@ if __name__ == "__main__":
     if args.killall:
         killall()
 
-    if args.machine:
-        machine = args.machine
-        if machine == 'master':
+    if args.run:
+        assert hostname
+        if hostname == 'master':
             master()
-        elif machine == 'w1':
-            w1()
-        elif machine == 'w2':
-            w2()
-        elif machine == 'w3':
-            w3()
-        elif machine == 'w18':
-            w18()
-        elif machine == 'w19':
-            w19()
-        elif machine == 'w20':
-            w20()
+        elif:
+            worker(hostname)
         else:
             print 'Dry run'
