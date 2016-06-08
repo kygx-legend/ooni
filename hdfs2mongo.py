@@ -5,46 +5,84 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from pymongo import MongoClient as mc
+from bs4 import BeautifulSoup as bs
 from bson.json_util import loads
+from pymongo import MongoClient as mc
 import pydoop.hdfs as hdfs
 
 import hashlib
+import re
 import time
 
-host = 'mongodb://172.16.104.62:20001'
 
-def read_from_hdfs(url):
+host = 'mongodb://172.16.104.62:20001'
+db = 'mydb'
+
+def json_from_hdfs(url):
     assert hdfs.path.isdir(url)
     file_lists = hdfs.ls(url)
     for fi in file_lists:
         with hdfs.open(fi, "r") as f:
-            items = f.read()
-            items = items.strip().split('\n')
+            items = f.read().strip().split('\n')
             for it in items:
                 it = loads(it)
                 it['md5'] = hashlib.md5(str(it)).hexdigest()
                 yield it
 
-def write_to_mongo(docs):
-    assert docs
+def xml_from_hdfs(url):
+    assert hdfs.path.isdir(url)
+    file_lists = hdfs.ls(url)
+    #for fi in file_lists:
+    for i in xrange(0, 1):
+        fi = '/datasets/corpus/enwiki-11g/wiki_912'
+        with hdfs.open(fi, "r") as f:
+            lines = f.read().strip().split('\n')
+            docs, doc = [], None
+            for line in lines:
+                if line.startswith('<doc'):
+                    doc = line
+                elif line.startswith('</doc>'):
+                    docs.append(doc + line)
+                else:
+                    #line = line.replace('&', '').replace('"', "'")
+                    doc += line.replace('"', "'")
+
+            for doc in docs:
+                dom = bs(doc).find('doc')
+                doc = dom.attrs
+                doc['content'] = dom.text
+                doc['md5'] = hashlib.md5(str(doc)).hexdigest()
+                yield doc
+
+def write_to_mongo(docs, collection, dup=False):
+    assert docs and collection 
 
     client = mc(host)
-    collection = client['mydb']['openrice']
+    collection = client[db][collection]
 
     count = 0
 
     for doc in docs:
-        if collection.find_one({'md5': doc['md5']}) is None:
+        if dup is True:
             collection.insert_one(doc)
-            print 'Inserted #%s...' % count
-            count += 1
+        elif collection.find_one({'md5': doc['md5']}) is None:
+            collection.insert_one(doc)
 
-    time.sleep(10)
+        print 'Inserted #%s...' % count
+        count += 1
+
+    time.sleep(30)
 
     print collection.count()
     assert collection.count() == count
 
+def main():
+    #docs =  json_from_hdfs('/datasets/crawl/openrice')
+    #write_to_mongo(docs, 'openrice')
+    docs = xml_from_hdfs('/datasets/corpus/enwiki-11g')
+    for d in docs:
+        print d
+    #write_to_mongo(docs, 'enwiki', True)
+
 if __name__ == "__main__":
-    docs =  read_from_hdfs('/datasets/crawl/openrice')
-    write_to_mongo(docs)
+    main()
