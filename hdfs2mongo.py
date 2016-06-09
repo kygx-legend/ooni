@@ -16,7 +16,8 @@ import time
 
 
 host = 'mongodb://172.16.104.62:20001'
-db = 'mydb'
+db = 'hdb'
+username = 'hdb_admin'
 
 def json_from_hdfs(url):
     assert hdfs.path.isdir(url)
@@ -58,7 +59,9 @@ def write_to_mongo(docs, collection, dup=False):
     assert docs and collection 
 
     client = mc(host)
-    collection = client[db][collection]
+    database = client[db]
+    database.authenticate(username, password=username)
+    collection = database[collection]
 
     count = 0
 
@@ -77,11 +80,9 @@ def write_to_mongo(docs, collection, dup=False):
     assert collection.count() == count
 
 def main():
-    #docs =  json_from_hdfs('/datasets/crawl/openrice')
-    #write_to_mongo(docs, 'openrice')
-    docs = xml_from_hdfs('/datasets/corpus/enwiki-11g')
-    for d in docs:
-        print d
+    docs =  json_from_hdfs('/datasets/crawl/openrice')
+    write_to_mongo(docs, 'openrice')
+    #docs = xml_from_hdfs('/datasets/corpus/enwiki-11g')
     #write_to_mongo(docs, 'enwiki', True)
 
 if __name__ == "__main__":
