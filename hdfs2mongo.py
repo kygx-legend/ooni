@@ -80,10 +80,10 @@ def write_to_mongo(docs, collection, dup=False):
     assert collection.count() == count
 
 def main():
-    docs =  json_from_hdfs('/datasets/crawl/openrice')
-    write_to_mongo(docs, 'openrice')
-    #docs = xml_from_hdfs('/datasets/corpus/enwiki-11g')
-    #write_to_mongo(docs, 'enwiki', True)
+    #docs =  json_from_hdfs('/datasets/crawl/openrice')
+    #write_to_mongo(docs, 'openrice')
+    docs = xml_from_hdfs('/datasets/corpus/enwiki-11g')
+    write_to_mongo(docs, 'enwiki_small', True)
 
 if __name__ == "__main__":
     main()

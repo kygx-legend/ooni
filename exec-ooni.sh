@@ -6,4 +6,4 @@
 # worker3
 #
 MACHINE_CFG=/data/legend/machine-all.cfg
-time pssh -t 0 -P -h ${MACHINE_CFG} -x "-t -t" "cd /data/legend/ooni && python $@"
+time pssh -t 0 -P -h ${MACHINE_CFG} -x "-t -t" "cd /data/legend/ooni && $@"

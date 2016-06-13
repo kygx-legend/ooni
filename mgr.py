@@ -83,6 +83,14 @@ def mongo_shell(shell=None):
     print_cmd(cmd, tag='Run')
     print os.system(cmd)
 
+def mongo_shell_with_auth(shell=None):
+    if not shell:
+        return
+
+    cmd = '{} --shell --host {} --port {} admin -u root -p Husky'.format(mongo, shell.split(':')[0], shell.split(':')[1])
+    print os.system(cmd)
+
+
 def killall():
     processes = ['mongod', 'mongos']    
     for p in processes:
@@ -93,7 +101,7 @@ def killall():
 def create_all_users():
     servers = [ '172.16.104.' + str(i) for i in xrange(1, 21) ]
     for s in servers:
-        c = 'mongo --host {} --port 20000 admin '.format(s)
+        c = '{} --host {} --port 20000 admin '.format(mongo, s)
         cmd = c + '--eval "db.getSiblingDB(\'admin\').createUser({user:\'root\',pwd:\'Husky\',roles:[\'root\']});"'
         print_cmd(cmd, tag='Run')
         print os.system(cmd)
@@ -107,6 +115,7 @@ def create_all_users():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='MongoDB Running Tools')
     parser.add_argument('-s', '--shell', help='Running MongoDB shell')
+    parser.add_argument('-sa', '--shellauth', help='Running MongoDB shell with authentication')
     parser.add_argument('-r', '--run', help='Running machine', action='store_true')
     parser.add_argument('-ka', '--killall', help='Killall running processes', action='store_true')
     parser.add_argument('-c', '--create', help='Create users for each shard', action='store_true')
@@ -114,6 +123,8 @@ if __name__ == "__main__":
 
     if args.shell:
         mongo_shell(args.shell)
+    elif args.shellauth:
+        mongo_shell_with_auth(args.shellauth)
 
     if args.killall:
         killall()

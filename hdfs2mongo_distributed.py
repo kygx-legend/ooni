@@ -24,7 +24,8 @@ client_tcp = "tcp://172.16.104.62:20003"
 host_name = os.uname()[1]
 
 mongo_host = 'mongodb://172.16.104.62:20001'
-db = 'mydb'
+db = 'hdb'
+username = 'hdb_admin'
 
 def xml_from_hdfs(url):
     with hdfs.open(url, "r") as f:
@@ -56,12 +57,14 @@ def write_to_mongo(docs, collection, dup=False):
     assert docs and collection 
 
     client = mc(mongo_host)
-    collection = client[db][collection]
+    database = client[db]
+    database.authenticate(username, password=username)
+    collection = database[collection]
 
     count = 0
 
     for doc in docs:
-        if dup is True:
+        if dup:
             try:
                 collection.insert_one(doc)
             except pymongo.errors.DuplicateKeyError, e:
