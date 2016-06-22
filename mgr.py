@@ -105,10 +105,21 @@ def create_all_users():
         cmd = c + '--eval "db.getSiblingDB(\'admin\').createUser({user:\'root\',pwd:\'Husky\',roles:[\'root\']});"'
         print_cmd(cmd, tag='Run')
         print os.system(cmd)
-        cmd = c + '--eval "db.getSiblingDB(\'hdb\').createUser({user:\'hdb_amin\',pwd:\'hdb_admin\',roles:[{role:\'readWrite\',db:\'hdb\'}]});"'
+        cmd = c + '--eval "db.getSiblingDB(\'hdb\').createUser({user:\'hdb_admin\',pwd:\'hdb_admin\',roles:[{role:\'readWrite\',db:\'hdb\'}]});"'
         print_cmd(cmd, tag='Run')
         print os.system(cmd)
         cmd = c + '--eval "db.getSiblingDB(\'hdb\').createUser({user:\'hdb\',pwd:\'hdb\',roles:[{role:\'read\',db:\'hdb\'}]});"'
+        print_cmd(cmd, tag='Run')
+        print os.system(cmd)
+
+def for_all_servers():
+    servers = [ '172.16.104.' + str(i) for i in xrange(1, 21) ]
+    for s in servers:
+        c = '{} --host {} --port 20000 admin -u root -p Husky '.format(mongo, s)
+        cmd = c + '--eval "db.getSiblingDB(\'hdb\').dropUser(\'hdb_amin\');"'
+        print_cmd(cmd, tag='Run')
+        print os.system(cmd)
+        cmd = c + '--eval "db.getSiblingDB(\'hdb\').createUser({user:\'hdb_admin\',pwd:\'hdb_admin\',roles:[{role:\'readWrite\',db:\'hdb\'}]});"'
         print_cmd(cmd, tag='Run')
         print os.system(cmd)
 
@@ -119,6 +130,7 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--run', help='Running machine', action='store_true')
     parser.add_argument('-ka', '--killall', help='Killall running processes', action='store_true')
     parser.add_argument('-c', '--create', help='Create users for each shard', action='store_true')
+    parser.add_argument('-fa', '--forallservers', help='For all servers', action='store_true')
     args = parser.parse_args()
 
     if args.shell:
@@ -131,6 +143,9 @@ if __name__ == "__main__":
 
     if args.create:
         create_all_users()
+
+    if args.forallservers:
+        for_all_servers()
 
     if args.run:
         assert hostname
