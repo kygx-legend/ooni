@@ -7,6 +7,7 @@
 
 import argparse
 import os
+import re
 
 # Env
 hostname = os.uname()[1]
@@ -53,8 +54,20 @@ mongos = MONGO_BIN_PATH + '/mongos'
 
 CONFIG = {
   'config': CONF_PATH + '/config.conf',
+  'config1': CONF_PATH + '/config1.conf',
+  'config9': CONF_PATH + '/config9.conf',
+  'config13': CONF_PATH + '/config13.conf',
+  'config18': CONF_PATH + '/config18.conf',
   'route': CONF_PATH + '/route.conf',
+  'route1': CONF_PATH + '/route1.conf',
+  'route9': CONF_PATH + '/route9.conf',
+  'route13': CONF_PATH + '/route13.conf',
+  'route18': CONF_PATH + '/route18.conf',
 }
+
+R_C = ['worker1', 'worker9', 'worker13', 'worker18']
+
+w_re = re.compile(r'worker(\d+)')
 
 def print_cmd(cmd, tag=None):
     if not tag:
@@ -74,6 +87,18 @@ def master():
 
 def worker(w):
     run(mb=mongod, log=MONGO_LOG + '/{}.log'.format(w), conf=CONF_PATH + '/{}.conf'.format(w))
+
+def route_config(w):
+    if w not in R_C:
+        return
+
+    m = re.findall(w_re, w)
+    if not m[0]:
+        return
+
+    w = m[0]
+    run(mb=mongod, log=MONGO_LOG + '/config{}.log'.format(w), conf=CONFIG['config{}'.format(w)])
+    run(mb=mongos, log=MONGO_LOG + '/route{}.log'.format(w), conf=CONFIG['route{}'.format(w)])
 
 def mongo_shell(shell=None):
     if not shell:
@@ -152,4 +177,5 @@ if __name__ == "__main__":
         if hostname == 'master':
             master()
         else:
+            #route_config(hostname)
             worker(hostname)
