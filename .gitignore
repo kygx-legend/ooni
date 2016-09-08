@@ -68,3 +68,5 @@ target/
 # Hongo inlcudes built
 hongo/.*
 hongo/build/
+
+driver/

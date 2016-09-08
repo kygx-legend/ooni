@@ -4,8 +4,8 @@
 import os
 
 files = [ 'worker' + str(i) for i in xrange(1, 21) ]
-#files += ['route']
-#files += ['config']
+files += ['route' + str(i) for i in [1, 9, 13, 18] ]
+files += ['config' + str(i) for i in [1, 9, 13, 18] ]
 
 def append():
     for f in files:
@@ -22,5 +22,5 @@ def remove():
             fi = open(f + '.conf', 'w')
             fi.write(b)
 
-append()
-#remove()
+#append()
+remove()

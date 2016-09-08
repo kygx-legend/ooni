@@ -153,6 +153,7 @@ if __name__ == "__main__":
     parser.add_argument('-s', '--shell', help='Running MongoDB shell')
     parser.add_argument('-sa', '--shellauth', help='Running MongoDB shell with authentication')
     parser.add_argument('-r', '--run', help='Running machine', action='store_true')
+    parser.add_argument('-rr', '--runroute', help='Running route', action='store_true')
     parser.add_argument('-ka', '--killall', help='Killall running processes', action='store_true')
     parser.add_argument('-c', '--create', help='Create users for each shard', action='store_true')
     parser.add_argument('-fa', '--forallservers', help='For all servers', action='store_true')
@@ -177,5 +178,8 @@ if __name__ == "__main__":
         if hostname == 'master':
             master()
         else:
-            #route_config(hostname)
             worker(hostname)
+
+    if args.runroute:
+        assert hostname
+        route_config(hostname)
