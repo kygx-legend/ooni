@@ -14,6 +14,7 @@ import zmq
 
 import hashlib
 import os
+import random
 import re
 import sys
 import time
@@ -23,7 +24,12 @@ server_tcp = "tcp://*:20003"
 client_tcp = "tcp://172.16.104.62:20003"
 host_name = os.uname()[1]
 
-mongo_host = 'mongodb://172.16.104.62:20001'
+mongo_host = [
+    'mongodb://172.16.104.9:20001',
+    'mongodb://172.16.104.1:20001',
+    'mongodb://172.16.104.13:20001',
+    'mongodb://172.16.104.18:20001'
+]
 db = 'hdb'
 username = 'hdb_admin'
 
@@ -56,9 +62,9 @@ def xml_from_hdfs(url):
 def write_to_mongo(docs, collection, dup=False):
     assert docs and collection 
 
-    client = mc(mongo_host)
+    client = mc(mongo_host[random.randint(0, 2)])
     database = client[db]
-    database.authenticate(username, password=username)
+    #database.authenticate(username, password=username)
     collection = database[collection]
 
     count = 0
