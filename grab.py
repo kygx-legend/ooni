@@ -1,5 +1,5 @@
 # Author: legend
-# Mail: legendlee1314@gmail.com
+# Mail: kygx.legend@gmail.com
 # File: grab.py
 
 #!/usr/bin/python
