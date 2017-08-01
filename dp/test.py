@@ -9,18 +9,28 @@ import tensorflow as tf
 import cv2
 import os
 
+from gym.envs.registration import register
+
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 tf.logging.set_verbosity(tf.logging.INFO)
+
+register(
+    id='Assault-v99',
+    entry_point='gym.envs.atari:AtariEnv',
+    kwargs={'game': 'assault', 'obs_type': 'image', 'frameskip': 1, 'repeat_action_probability': 0},
+    max_episode_steps=1000000,
+    nondeterministic=False,
+)
 
 def draw(pixels):
     smp.toimage(pixels).show()
 
 def conv2d(x, W):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='VALID')
 
 def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
 
 def weight_variable(shape, name):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -41,9 +51,9 @@ class CNN(object):
         self.b_conv2 = bias_variable([64], name='b_conv2')
         self.h_conv2 = tf.nn.relu(conv2d(self.h_pool1, self.W_conv2) + self.b_conv2)
         self.h_pool2 = max_pool_2x2(self.h_conv2)
-        self.W_fc1 = weight_variable([20*20*64, 1024], name='W_fc1')
+        self.W_fc1 = weight_variable([17*17*64, 1024], name='W_fc1')
         self.b_fc1 = bias_variable([1024], name='b_fc1')
-        self.h_pool2_flat = tf.reshape(self.h_pool2, [-1, 20*20*64])
+        self.h_pool2_flat = tf.reshape(self.h_pool2, [-1, 17*17*64])
         self.h_fc1 = tf.nn.relu(tf.matmul(self.h_pool2_flat, self.W_fc1) + self.b_fc1)
         self.keep_prob = 1.0
         self.h_fc1_drop = tf.nn.dropout(self.h_fc1, self.keep_prob)
@@ -73,7 +83,7 @@ def compress(img):
 def main(unused_argv):
     import scipy.misc as smp
 
-    env = gym.make('Assault-v0')
+    env = gym.make('Assault-v99')
 
     x = tf.placeholder(tf.float32, [None, 4, 80, 80])
     Q = CNN(x)

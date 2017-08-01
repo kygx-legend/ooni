@@ -11,10 +11,19 @@ import tensorflow as tf
 import os
 import cv2
 
+from gym.envs.registration import register
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "4"
+os.environ["CUDA_VISIBLE_DEVICES"] = "5"
 
-tf.logging.set_verbosity(tf.logging.INFO)
+# tf.logging.set_verbosity(tf.logging.INFO)
+
+register(
+    id='Assault-v99',
+    entry_point='gym.envs.atari:AtariEnv',
+    kwargs={'game': 'assault', 'obs_type': 'image', 'frameskip': 1, 'repeat_action_probability': 0},
+    max_episode_steps=1000000,
+    nondeterministic=False,
+)
 
 def rgb2gray(rgb):
     return numpy.dot(rgb[...,:3], [0.299, 0.587, 0.114])
@@ -23,10 +32,10 @@ def draw(pixels):
     smp.toimage(pixels).show()
 
 def conv2d(x, W):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='VALID')
 
 def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
 
 def weight_variable(shape, name):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -47,9 +56,9 @@ class CNN(object):
         self.b_conv2 = bias_variable([64], name='b_conv2')
         self.h_conv2 = tf.nn.relu(conv2d(self.h_pool1, self.W_conv2) + self.b_conv2)
         self.h_pool2 = max_pool_2x2(self.h_conv2)
-        self.W_fc1 = weight_variable([20*20*64, 1024], name='W_fc1')
+        self.W_fc1 = weight_variable([17*17*64, 1024], name='W_fc1')
         self.b_fc1 = bias_variable([1024], name='b_fc1')
-        self.h_pool2_flat = tf.reshape(self.h_pool2, [-1, 20*20*64])
+        self.h_pool2_flat = tf.reshape(self.h_pool2, [-1, 17*17*64])
         self.h_fc1 = tf.nn.relu(tf.matmul(self.h_pool2_flat, self.W_fc1) + self.b_fc1)
         self.keep_prob = 1.0
         self.h_fc1_drop = tf.nn.dropout(self.h_fc1, self.keep_prob)
@@ -101,7 +110,7 @@ def compress(img):
 def main(unused_argv):
     import scipy.misc as smp
 
-    env = gym.make('Assault-v0')
+    env = gym.make('Assault-v99')
 
     x = tf.placeholder(tf.float32, [None, 4, 80, 80])
     y = tf.placeholder(tf.float32, [None, 1])
@@ -115,7 +124,7 @@ def main(unused_argv):
 
     Q_predict = tf.argmax(Q.y_conv, axis=1)
     Q_max_predict = tf.reduce_max(Q_.y_conv, axis=1)
-    diff = tf.reduce_sum(Q.y_conv * a, axis=1) - y
+    diff = tf.reduce_sum(Q.y_conv * a, axis=1, keep_dims=True) - y
     huber_loss = tf.where(tf.abs(diff) < 0.5, tf.square(diff), tf.abs(diff))
     cost = tf.reduce_sum(huber_loss)
     train_op = tf.train.RMSPropOptimizer(0.00025, momentum=0.95).minimize(cost)
@@ -123,6 +132,9 @@ def main(unused_argv):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         sess.run(Q_.copy_op(Q))
+
+        summ_writer = tf.summary.FileWriter('./graph', graph = sess.graph)
+        summ_writer.close()
 
         gama = 0.99
 
@@ -151,7 +163,6 @@ def main(unused_argv):
                         k = 3
                     else:
                         k -= 1
-                    print action
 
                 x_n, r, done, info = env.step(action)
                 sum_reward += r
@@ -171,7 +182,6 @@ def main(unused_argv):
                     D_n = 0
 
                 if D_size >= expr_replay_mem_size:
-                    print D_n, Q.y_conv.eval(feed_dict={x: [s_n]})[0]
                     xx, yy, aa = [], [], []
                     mini_batch = numpy.random.choice(len(D), 32, replace=False)
                     for i in mini_batch:
