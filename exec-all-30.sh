@@ -5,5 +5,5 @@
 # worker2
 # worker3
 #
-MACHINE_CFG=/data/legend/machine-all-20.cfg
+MACHINE_CFG=/data/legend/machine-all-30.cfg
 time pssh -t 0 -P -h ${MACHINE_CFG} -x "-t -t" "cd /data/legend/ooni && $@"
